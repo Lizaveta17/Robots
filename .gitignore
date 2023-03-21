@@ -2,3 +2,7 @@
 /robots/.settings
 /robots/bin
 eclipse.bat
+.DS_Store
+robots/.DS_Store
+.idea/
+target/
