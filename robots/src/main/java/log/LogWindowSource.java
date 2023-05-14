@@ -49,9 +49,11 @@ public class LogWindowSource
     public void append(LogLevel logLevel, String strMessage)
     {
         LogEntry entry = new LogEntry(logLevel, strMessage);
-        m_messages.offer(entry);
-        if (m_messages.size() == m_iQueueLength) {
-            m_messages.poll();
+        synchronized (m_messages) {
+            m_messages.offer(entry);
+            if (m_messages.size() == m_iQueueLength) {
+                m_messages.poll();
+            }
         }
         LogChangeListener [] activeListeners = m_activeListeners;
         if (activeListeners == null)
