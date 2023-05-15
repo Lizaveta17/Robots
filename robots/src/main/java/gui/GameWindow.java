@@ -1,16 +1,15 @@
 package gui;
 
-import java.awt.BorderLayout;
+import gui.closing.JInternalFrameWithClosingConfirmation;
 
-import javax.swing.JInternalFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.*;
 
-public class GameWindow extends JInternalFrame
-{
+public class GameWindow extends JInternalFrameWithClosingConfirmation {
     private final GameVisualizer m_visualizer;
-    public GameWindow(String title)
-    {
-        super(title, true, true, true, true);
+
+    public GameWindow(String title) {
+        super(title);
         m_visualizer = new GameVisualizer();
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(m_visualizer, BorderLayout.CENTER);

@@ -141,7 +141,7 @@ public class GameVisualizer extends JPanel
         robot.positionX = newX;
         robot.positionY = newY;
         double newDirection = asNormalizedRadians(robot.direction + angularVelocity * duration);
-        if (Math.abs(newX - SCREEN_WIDTH) <= 10 | Math.abs(newY - SCREEN_HEIGHT) <= 10 | newX <= 10 | newY <= 10){
+        if (Math.abs(newX - SCREEN_WIDTH) <= 1 | Math.abs(newY - SCREEN_HEIGHT) <= 1 | newX <= 1 | newY <= 1){
             newDirection = (newDirection + Math.PI) % 2 * Math.PI;
         }
         robot.direction = newDirection;

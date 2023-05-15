@@ -17,7 +17,7 @@ public class LanguageManager {
         catch (IllegalArgumentException e){
             currentLanguage = AppLanguage.EN;
         }
-    };
+    }
 
     public String getLocaleValue(String name){
         try{

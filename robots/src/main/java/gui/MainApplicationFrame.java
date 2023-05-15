@@ -1,27 +1,25 @@
 package gui;
 
+import gui.closing.JFrameWithClosingConfirmation;
 import gui.language.AppLanguage;
-import gui.language.LanguageManager;
 import log.Logger;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import javax.swing.*;
 
 
-public class MainApplicationFrame extends JFrame {
-    private final LanguageManager languageManager = new LanguageManager(Locale.getDefault().getLanguage());
+public class MainApplicationFrame extends JFrameWithClosingConfirmation {
     private final JDesktopPane desktopPane = new JDesktopPane();
-    private ArrayList<JInternalFrame> internalFrames = new ArrayList<>();
+    private final ArrayList<JInternalFrame> internalFrames = new ArrayList<>();
 
     public MainApplicationFrame() {
+        setDefaultMode();
+
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds(inset, inset,
@@ -42,13 +40,14 @@ public class MainApplicationFrame extends JFrame {
         internalFrames.add(gameWindow);
 
         generateAndSetMenuBar();
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        WindowAdapter windowAdapter = new WindowAdapter() {
-            public void windowClosing(WindowEvent windowEvent) {
-                exit();
-            }
-        };
-        addWindowListener(windowAdapter);
+    }
+
+    private void setDefaultMode() {
+        try {
+            UIManager.setLookAndFeel(DisplayMode.NIMBUS.className);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     protected LogWindow createLogWindow() {
@@ -118,24 +117,15 @@ public class MainApplicationFrame extends JFrame {
         return menu;
     }
 
-    private void exit() {
-        if (JOptionPane.showConfirmDialog(
-                desktopPane,
-                languageManager.getLocaleValue("close.confirmMessage"),
-                languageManager.getLocaleValue("close.confirmTitle"),
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE) == 0) {
-            System.exit(0);
-        }
-    }
+    private JMenu createExitMenu() {
+        JMenu menu = new JMenu(languageManager.getLocaleValue("close"));
+        JButton button = new JButton(languageManager.getLocaleValue("close.button"));
+        button.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
+        button.setContentAreaFilled(false);
 
-    private JMenu createExit() {
-        JMenu createExit = new JMenu(languageManager.getLocaleValue("close"));
-        JButton exit = new JButton(languageManager.getLocaleValue("close.button"));
-
-        exit.addActionListener(event -> exit());
-        createExit.add(exit);
-        return  createExit;
+        button.addActionListener(event -> exit());
+        menu.add(button);
+        return menu;
     }
 
     private void generateAndSetMenuBar() {
@@ -143,7 +133,7 @@ public class MainApplicationFrame extends JFrame {
         menuBar.add(createLookAndFeelMenu());
         menuBar.add(createTestMenu());
         menuBar.add(createLanguageMenu());
-        menuBar.add(createExit());
+        menuBar.add(createExitMenu());
         setJMenuBar(menuBar);
     }
 
