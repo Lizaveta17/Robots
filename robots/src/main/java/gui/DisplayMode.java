@@ -3,16 +3,14 @@ package gui;
 import javax.swing.*;
 
 enum DisplayMode {
-    METAL("javax.swing.plaf.metal.MetalLookAndFeel", "Metal"),
-    NIMBUS("javax.swing.plaf.nimbus.NimbusLookAndFeel", "Nimbus"),
-    CROSS_PLATFORM(UIManager.getSystemLookAndFeelClassName(), "Универсальная схема"),
-    SYSTEM(UIManager.getCrossPlatformLookAndFeelClassName(), "Системная схема");
+    METAL("javax.swing.plaf.metal.MetalLookAndFeel"),
+    NIMBUS("javax.swing.plaf.nimbus.NimbusLookAndFeel"),
+    CROSS_PLATFORM(UIManager.getSystemLookAndFeelClassName()),
+    SYSTEM(UIManager.getCrossPlatformLookAndFeelClassName());
 
     public final String className;
-    public final String description;
 
-    DisplayMode(String className, String description) {
+    DisplayMode(String className) {
         this.className = className;
-        this.description = description;
     }
 }
