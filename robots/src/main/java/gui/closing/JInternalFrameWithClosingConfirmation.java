@@ -1,5 +1,6 @@
 package gui.closing;
 
+import gui.language.AppLanguage;
 import gui.language.LanguageManager;
 
 import javax.swing.*;
@@ -28,5 +29,9 @@ public class JInternalFrameWithClosingConfirmation extends JInternalFrame {
                 JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
             dispose();
         }
+    }
+
+    public void updateLocale(AppLanguage language) {
+        languageManager.changeLanguage(language);
     }
 }

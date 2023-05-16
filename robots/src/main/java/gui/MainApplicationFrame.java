@@ -1,6 +1,7 @@
 package gui;
 
 import gui.closing.JFrameWithClosingConfirmation;
+import gui.closing.JInternalFrameWithClosingConfirmation;
 import gui.language.AppLanguage;
 import log.Logger;
 
@@ -15,7 +16,7 @@ import javax.swing.*;
 
 public class MainApplicationFrame extends JFrameWithClosingConfirmation {
     private final JDesktopPane desktopPane = new JDesktopPane();
-    private final ArrayList<JInternalFrame> internalFrames = new ArrayList<>();
+    private final ArrayList<JInternalFrameWithClosingConfirmation> internalFrames = new ArrayList<>();
 
     public MainApplicationFrame() {
         setDefaultMode();
@@ -147,11 +148,13 @@ public class MainApplicationFrame extends JFrameWithClosingConfirmation {
         }
     }
 
-    private void updateLocale(AppLanguage language) {
-        languageManager.changeLanguage(language);
+    @Override
+    protected void updateLocale(AppLanguage language) {
+        super.updateLocale(language);
         generateAndSetMenuBar();
-        for (JInternalFrame frame : internalFrames) {
+        for (JInternalFrameWithClosingConfirmation frame : internalFrames) {
             frame.setTitle(languageManager.getLocaleValue(String.format("%s.title", frame.getName())));
+            frame.updateLocale(language);
         }
         SwingUtilities.updateComponentTreeUI(this);
     }

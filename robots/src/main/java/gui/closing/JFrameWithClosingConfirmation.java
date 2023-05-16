@@ -1,5 +1,6 @@
 package gui.closing;
 
+import gui.language.AppLanguage;
 import gui.language.LanguageManager;
 
 import javax.swing.*;
@@ -28,4 +29,7 @@ public class JFrameWithClosingConfirmation extends JFrame {
         }
     }
 
+    protected void updateLocale(AppLanguage language) {
+        languageManager.changeLanguage(language);
+    }
 }
