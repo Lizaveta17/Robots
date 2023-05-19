@@ -177,7 +177,7 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
         languageManager.changeLanguage(language);
         generateAndSetMenuBar();
         for (InternalWindow frame : internalFrames) {
-            frame.setTitle(languageManager.getLocaleValue(String.format("%s.title", frame.getClass().toString())));
+            frame.setTitle(languageManager.getLocaleValue(String.format("%s.title", frame.getName())));
             frame.updateLocale(language);
         }
         SwingUtilities.updateComponentTreeUI(this);
@@ -216,9 +216,9 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
 
             LanguageManager langManager = new LanguageManager(lang.locale);
             RecoveryConfirmDialog recoveryConfirmWindow = new RecoveryConfirmDialog(langManager);
+            updateLocale(lang);
             if (recoveryConfirmWindow.needRecovery()) {
                 for (InternalWindow frame : internalFrames) {
-                    frame.updateLocale(lang);
                     Serializer.deserialize(frame);
                 }
             }
