@@ -1,11 +1,11 @@
 package gui;
 
-import gui.closing.JInternalFrameWithClosingConfirmation;
+import gui.system_windows.InternalWindow;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class GameWindow extends JInternalFrameWithClosingConfirmation {
+public class GameWindow extends InternalWindow {
     private final GameVisualizer m_visualizer;
 
     public GameWindow(String title) {
