@@ -74,13 +74,13 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
         logWindow.pack();
         Logger.debug(languageManager.getLocaleValue("tests.startLog"));
         addWindow(logWindow);
-//        logWindow.setName("logWindow");
+        logWindow.setName("logWindow");
     }
 
     private void addGameWindow() {
         GameWindow gameWindow = new GameWindow(languageManager.getLocaleValue("gameWindow.title"));
         gameWindow.setSize(400, 400);
-        //        gameWindow.setName("gameWindow");
+        gameWindow.setName("gameWindow");
         addWindow(gameWindow);
     }
 
