@@ -5,12 +5,10 @@ import gui.language.LanguageManager;
 import gui.language.LocaleChangeable;
 import gui.system_windows.closing.Closeable;
 import gui.system_windows.closing.ClosingConfirmDialog;
-import serializer.Serializer;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import java.io.Serializable;
 import java.util.Locale;
 
 public class InternalWindow extends JInternalFrame implements Closeable, LocaleChangeable {

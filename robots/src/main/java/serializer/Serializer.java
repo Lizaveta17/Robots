@@ -1,13 +1,6 @@
 package serializer;
 
-import gui.language.AppLanguage;
-import gui.language.LanguageManager;
 import gui.system_windows.InternalWindow;
-import log.Logger;
-
-import javax.swing.*;
-import java.beans.PropertyVetoException;
-import java.util.Locale;
 import java.util.prefs.Preferences;
 
 public class Serializer {
