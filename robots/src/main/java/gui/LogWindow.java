@@ -14,8 +14,8 @@ public class LogWindow extends InternalWindow implements LogChangeListener {
     private final LogWindowSource m_logSource;
     private final TextArea m_logContent;
 
-    public LogWindow(LogWindowSource logSource, String title) {
-        super(title);
+    public LogWindow(LogWindowSource logSource) {
+        super();
         m_logSource = logSource;
         m_logSource.registerListener(this);
         m_logContent = new TextArea("");
