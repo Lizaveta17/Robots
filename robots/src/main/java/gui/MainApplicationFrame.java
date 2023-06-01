@@ -9,7 +9,7 @@ import gui.system_windows.closing.Closeable;
 import gui.system_windows.closing.ClosingConfirmDialog;
 import gui.system_windows.serialization.StateRecoverable;
 import log.Logger;
-import serializer.Serializer;
+import serializer.IntrenalFrameSerializer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,7 +28,6 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
     LanguageManager languageManager = new LanguageManager(Locale.getDefault().getLanguage());
     ClosingConfirmDialog closeConfirmWindow = new ClosingConfirmDialog(languageManager);
     private final JDesktopPane desktopPane = new JDesktopPane();
-    private final ArrayList<InternalWindow> internalFrames = new ArrayList<>();
 
     public MainApplicationFrame() {
         super();
@@ -85,7 +84,6 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
     }
 
     protected void addWindow(InternalWindow frame) {
-        internalFrames.add(frame);
         desktopPane.add(frame);
         frame.setVisible(true);
     }
@@ -176,9 +174,10 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
     public void updateLocale(AppLanguage language) {
         languageManager.changeLanguage(language);
         generateAndSetMenuBar();
-        for (InternalWindow frame : internalFrames) {
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
             frame.setTitle(languageManager.getLocaleValue(String.format("%s.title", frame.getName())));
-            frame.updateLocale(language);
+            InternalWindow window = (InternalWindow)frame;
+            window.updateLocale(language);
         }
         SwingUtilities.updateComponentTreeUI(this);
     }
@@ -186,8 +185,8 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
     public void serialize() {
         Preferences preferences = Preferences.userNodeForPackage(MainApplicationFrame.class);
         preferences.put("language", languageManager.getCurrentLanguage().toString());
-        for (InternalWindow frame : internalFrames) {
-            Serializer.serialize(frame);
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            IntrenalFrameSerializer.serialize(frame);
         }
     }
 
@@ -218,8 +217,8 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
             RecoveryConfirmDialog recoveryConfirmWindow = new RecoveryConfirmDialog(langManager);
             updateLocale(lang);
             if (recoveryConfirmWindow.needRecovery()) {
-                for (InternalWindow frame : internalFrames) {
-                    Serializer.deserialize(frame);
+                for (JInternalFrame frame : desktopPane.getAllFrames()) {
+                    IntrenalFrameSerializer.deserialize(frame);
                 }
             }
         } catch (BackingStoreException e) {
