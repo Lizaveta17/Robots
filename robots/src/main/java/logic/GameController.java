@@ -1,9 +1,8 @@
-package game;
+package logic;
 
-import models.ComputerRobot;
-import models.Robot;
-import models.RobotDirection;
-import models.UserRobot;
+import entity.ComputerRobot;
+import entity.RobotDirection;
+import entity.UserRobot;
 
 import java.awt.*;
 import java.util.HashMap;

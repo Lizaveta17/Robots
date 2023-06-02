@@ -1,7 +1,7 @@
 package gui.adapters;
 
-import game.GameController;
-import models.RobotDirection;
+import logic.GameController;
+import entity.RobotDirection;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;

@@ -1,4 +1,6 @@
-package models;
+package entity;
+
+import logic.MathLogic;
 
 import java.awt.*;
 
@@ -19,6 +21,13 @@ public class Robot {
         this.bodyColor = bodyColor;
         this.widthDiam = widthDiam;
         this.heightDiam = heightDiam;
+    }
+
+    public int getRoundedX(){
+        return MathLogic.round(positionX);
+    }
+    public int getRoundedY(){
+        return MathLogic.round(positionY);
     }
 }
 
