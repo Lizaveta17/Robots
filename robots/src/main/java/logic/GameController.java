@@ -6,35 +6,46 @@ import entity.Target;
 import entity.UserRobot;
 
 import java.awt.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
 
 public class GameController {
     private int fieldWidth;
     private int fieldHeight;
-    private final ComputerRobot computerRobot = new ComputerRobot(100, 100, 0, 0.1, Color.MAGENTA, 30, 20, 5);
-    private final UserRobot userRobot = new UserRobot(200, 100, 1, 3, Color.BLUE, 30, 30);
-    private final Target target;
-
+    private final ComputerRobot computerRobot;
+    private final UserRobot userRobot;
     private final HashMap<RobotDirection, Boolean> userMovementState = new HashMap<>();
+    private final Target target;
+    private boolean isGameOn = false;
+    private volatile int score = 0;
+    private static final int VICTORY_SCORE = 2;
 
-    public GameController(int width, int height){
+    private final PropertyChangeSupport scoreChangeDispatcher = new PropertyChangeSupport(this);
+
+    public GameController(int width, int height) {
         fieldWidth = width;
         fieldHeight = height;
-        target = new Target(MathLogic.round(width / 2.0), MathLogic.round(height / 2.0), Color.RED);
-        for (RobotDirection direction : RobotDirection.values()){
+        computerRobot = new ComputerRobot(
+                -100, -100, 0, 0.1, Color.MAGENTA, 30, 20, 5
+        );
+        userRobot = new UserRobot(-100, -100, 1, 3, Color.BLUE, 30, 30);
+        target = new Target(-100, -100, Color.RED);
+        //        target = new Target(MathLogic.round(width / 2.0), MathLogic.round(height / 2.0), Color.RED);
+        for (RobotDirection direction : RobotDirection.values()) {
             userMovementState.put(direction, false);
         }
     }
 
-    public UserRobot getUserRobot(){
+    public UserRobot getUserRobot() {
         return userRobot;
     }
 
-    public ComputerRobot getComputerRobot(){
+    public ComputerRobot getComputerRobot() {
         return computerRobot;
     }
 
-    public Target getTarget(){
+    public Target getTarget() {
         return target;
     }
 
@@ -42,38 +53,50 @@ public class GameController {
         userMovementState.put(direction, state);
     }
 
-    public void moveUserRobot(){
-        if (userMovementState.get(RobotDirection.UP)){
+    public void moveUserRobot() {
+        if (userMovementState.get(RobotDirection.UP)) {
             userRobot.goUp();
         }
-        if (userMovementState.get(RobotDirection.DOWN)){
+        if (userMovementState.get(RobotDirection.DOWN)) {
             userRobot.goDown();
         }
-        if (userMovementState.get(RobotDirection.LEFT)){
+        if (userMovementState.get(RobotDirection.LEFT)) {
             userRobot.goLeft();
         }
-        if (userMovementState.get(RobotDirection.RIGHT)){
+        if (userMovementState.get(RobotDirection.RIGHT)) {
             userRobot.goRight();
         }
         correctUserRobotCoordinates();
     }
 
-    private void correctUserRobotCoordinates(){
+    private void correctUserRobotCoordinates() {
         if (fieldWidth != 0) {
-            double newX = MathLogic.applyLimits(userRobot.x, 0, fieldWidth);
+            double newX = MathLogic.applyLimits(userRobot.x, userRobot.widthRadious, fieldWidth - userRobot.widthRadious);
             userRobot.x = newX;
         }
 
         if (fieldHeight != 0) {
-            double newY = MathLogic.applyLimits(userRobot.y, 0, fieldHeight);
+            double newY = MathLogic.applyLimits(userRobot.y, userRobot.heightRadious, fieldHeight - userRobot.heightRadious);
             userRobot.y = newY;
         }
     }
 
-    private boolean isUserRobotReachedTarget(){
+    private boolean isUserRobotReachedTarget() {
         double distance = Math.sqrt(Math.pow(userRobot.x - target.x, 2) + Math.pow(userRobot.y - target.y, 2));
-        return distance <= userRobot.widthDiam || distance <= userRobot.heightDiam;
+        return distance < userRobot.widthRadious || distance < userRobot.heightRadious;
     }
+
+    private void setStartPositions(){
+        target.x = 300;
+        target.y = 300;
+
+        userRobot.x = 200;
+        userRobot.y = 200;
+
+        computerRobot.x = 100;
+        computerRobot.y = 100;
+    }
+
     private void generateNewTarget() {
         int newX = MathLogic.generateRandomLimitInt(fieldWidth);
         int newY = MathLogic.generateRandomLimitInt(fieldHeight);
@@ -81,10 +104,56 @@ public class GameController {
         target.y = newY;
     }
 
-    public void onModelUpdateEvent(){
-        moveUserRobot();
-        if( isUserRobotReachedTarget()){
-            generateNewTarget();
+    private void updateScore(int diff){
+        int newScore = score + diff;
+        if (newScore < 0){
+            handleGameOver();
         }
+        score = newScore;
+        scoreChangeDispatcher.firePropertyChange(GameState.SCORE_CHANGED.state, null, newScore);
+    }
+
+    public void startGame(){
+        isGameOn = true;
+        setStartPositions();
+    }
+    
+    private void stopGame(){
+        isGameOn = false;
+    }
+
+    private void handleGameWin(){
+        stopGame();
+        scoreChangeDispatcher.firePropertyChange(GameState.GAME_WIN.state, null, null);
+    }
+    private void handleGameOver(){
+        stopGame();
+        scoreChangeDispatcher.firePropertyChange(GameState.GAME_OVER.state, null, null);
+    }
+
+    public void onModelUpdateEvent() {
+        if (!isGameOn){
+            return;
+        }
+
+        moveUserRobot();
+
+//        if (!isGameOn){
+//            return;
+//        }
+        if (isUserRobotReachedTarget()) {
+            updateScore(1);
+             if (score == VICTORY_SCORE){
+                 handleGameWin();
+             } else {
+                 generateNewTarget();
+             }
+        }
+    }
+
+    public void addStateGameListener(PropertyChangeListener listener){
+        scoreChangeDispatcher.addPropertyChangeListener(GameState.SCORE_CHANGED.state, listener);
+        scoreChangeDispatcher.addPropertyChangeListener(GameState.GAME_WIN.state, listener);
+        scoreChangeDispatcher.addPropertyChangeListener(GameState.GAME_OVER.state, listener);
     }
 }

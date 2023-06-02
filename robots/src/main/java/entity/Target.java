@@ -7,7 +7,7 @@ public class Target {
     public volatile int y;
     public final Color color;
 
-    private final int diam = 12;
+    private final int diam = 8;
 
     public Target(int x, int y, Color color) {
         this.x = x;

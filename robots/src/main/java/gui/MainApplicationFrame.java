@@ -66,7 +66,7 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
     }
 
     private void addLogWindow() {
-        LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource(), languageManager.getLocaleValue("logWindow.title"));
+        LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource(), languageManager.getLocaleValue("LogWindow.title"));
         logWindow.setLocation(10, 10);
         logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
@@ -77,7 +77,7 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
     private void addGameWindow() {
         int startWidth = 400;
         int startHeight = 400;
-        GameWindow gameWindow = new GameWindow(languageManager.getLocaleValue("gameWindow.title"), startWidth, startHeight);
+        GameWindow gameWindow = new GameWindow(languageManager.getLocaleValue("GameWindow.title"), startWidth, startHeight);
         gameWindow.setSize(startWidth, startHeight);
         gameWindow.setLocation(350, 10);
         addWindow(gameWindow);

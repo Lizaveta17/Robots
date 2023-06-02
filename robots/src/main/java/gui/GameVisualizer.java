@@ -43,11 +43,9 @@ public class GameVisualizer extends JPanel
     private static final double maxAngularVelocity = 0.001;
     private final GameController gameController;
 
-    public GameVisualizer(int startWidth, int startHeight)
+    public GameVisualizer(GameController gameController)
     {
-        fieldWidth = startWidth;
-        fieldHeight = startHeight;
-        gameController = new GameController(startWidth, startHeight);
+        this.gameController = gameController;
         m_timer.schedule(new TimerTask()
         {
             @Override
@@ -69,7 +67,8 @@ public class GameVisualizer extends JPanel
 //            @Override
 //            public void mouseClicked(MouseEvent e)
 //            {
-//                setTargetPosition(e.getPoint());
+////                setTargetPosition(e.getPoint());
+//                System.out.println("WDECFVD");
 //                repaint();
 //            }
 //        });

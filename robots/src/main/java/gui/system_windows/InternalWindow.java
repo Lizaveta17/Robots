@@ -9,9 +9,11 @@ import gui.system_windows.closing.ClosingConfirmDialog;
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Locale;
 
-public class InternalWindow extends JInternalFrame implements Closeable, LocaleChangeable {
+public class InternalWindow extends JInternalFrame implements Closeable, LocaleChangeable, PropertyChangeListener {
     protected LanguageManager languageManager;
     ClosingConfirmDialog closeDialog;
 
@@ -39,10 +41,9 @@ public class InternalWindow extends JInternalFrame implements Closeable, LocaleC
 
     @Override
     public String getName() {
-        String name = super.getName();
-        if (name == null) {
-            return this.getClass().toString();
-        }
-        return name;
+        return getClass().getSimpleName();
     }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {}
 }

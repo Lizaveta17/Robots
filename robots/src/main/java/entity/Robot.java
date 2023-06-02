@@ -13,6 +13,9 @@ public class Robot{
     public final int widthDiam;
     public final int heightDiam;
 
+    public final int widthRadious;
+    public final int heightRadious;
+
     public Robot(double x, double y, double direction, double velocity, Color bodyColor, int widthDiam, int heightDiam){
         this.x = x;
         this.y = y;
@@ -21,6 +24,8 @@ public class Robot{
         this.bodyColor = bodyColor;
         this.widthDiam = widthDiam;
         this.heightDiam = heightDiam;
+        widthRadious = widthDiam / 2;
+        heightRadious = heightDiam / 2;
     }
 
     public int getRoundedX(){

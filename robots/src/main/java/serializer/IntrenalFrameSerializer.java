@@ -16,7 +16,6 @@ public class IntrenalFrameSerializer {
         prefs.putInt(name + ".y", window.getY());
         prefs.putBoolean(name + ".isIcon", window.isIcon());
         prefs.putBoolean(name + ".isMaximum", window.isMaximum());
-        prefs.putBoolean(name + ".isClosed", window.isClosed());
     }
 
     public static void deserialize(JInternalFrame window) {
@@ -31,9 +30,6 @@ public class IntrenalFrameSerializer {
             }
             if (prefs.getBoolean(name + ".isMaximum", false)){
                 window.setMaximum(true);
-            }
-            if (prefs.getBoolean(name + ".isClosed", false)){
-                window.setClosed(true);
             }
         } catch (PropertyVetoException e){
             e.printStackTrace();
