@@ -34,8 +34,7 @@ public class MainApplicationFrame extends JFrameWithClosingConfirmation {
         logWindow.setName("logWindow");
         internalFrames.add(logWindow);
 
-        GameWindow gameWindow = new GameWindow(languageManager.getLocaleValue("gameWindow.title"));
-        gameWindow.setSize(400, 400);
+        GameWindow gameWindow = createGameWindow();
         gameWindow.setName("gameWindow");
         addWindow(gameWindow);
         internalFrames.add(gameWindow);
@@ -51,13 +50,22 @@ public class MainApplicationFrame extends JFrameWithClosingConfirmation {
         }
     }
 
-    protected LogWindow createLogWindow() {
+    private LogWindow createLogWindow() {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource(), languageManager.getLocaleValue("logWindow.title"));
         logWindow.setLocation(10, 10);
         logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
         Logger.debug(languageManager.getLocaleValue("tests.startLog"));
         return logWindow;
+    }
+
+    private GameWindow createGameWindow(){
+        int startWidth = 400;
+        int startHeight = 400;
+        GameWindow gameWindow = new GameWindow(languageManager.getLocaleValue("gameWindow.title"), startWidth, startHeight);
+        gameWindow.setSize(startWidth, startHeight);
+        gameWindow.setLocation(350, 10);
+        return gameWindow;
     }
 
     protected void addWindow(JInternalFrame frame) {

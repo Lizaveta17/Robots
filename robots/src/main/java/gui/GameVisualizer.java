@@ -1,5 +1,6 @@
 package gui;
 
+import entity.Target;
 import logic.GameController;
 import gui.adapters.KeyPressAdapter;
 import entity.ComputerRobot;
@@ -12,6 +13,8 @@ import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -30,17 +33,21 @@ public class GameVisualizer extends JPanel
         return timer;
     }
 
-    private final Point target = new Point(100, 100);
-
     private int SCREEN_WIDTH;
     private int SCREEN_HEIGHT;
 
+    private int fieldWidth;
+    private int fieldHeight;
+
     private static final double maxVelocity = 0.1;
     private static final double maxAngularVelocity = 0.001;
-    private final GameController gameController = new GameController();
+    private final GameController gameController;
 
-    public GameVisualizer()
+    public GameVisualizer(int startWidth, int startHeight)
     {
+        fieldWidth = startWidth;
+        fieldHeight = startHeight;
+        gameController = new GameController(startWidth, startHeight);
         m_timer.schedule(new TimerTask()
         {
             @Override
@@ -57,23 +64,24 @@ public class GameVisualizer extends JPanel
                 gameController.onModelUpdateEvent();
             }
         }, 0, 10);
-        addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                setTargetPosition(e.getPoint());
-                repaint();
-            }
-        });
+//        addMouseListener(new MouseAdapter()
+//        {
+//            @Override
+//            public void mouseClicked(MouseEvent e)
+//            {
+//                setTargetPosition(e.getPoint());
+//                repaint();
+//            }
+//        });
+//        addComponentListener(new ComponentAdapter() {
+//            @Override
+//            public void componentResized(ComponentEvent e) {
+//                gameController.applyLimits(getWidth(), getHeight());
+//            }
+//        });
         addKeyListener(new KeyPressAdapter(gameController));
         setFocusable(true);
         setDoubleBuffered(true);
-    }
-
-    protected void setTargetPosition(Point p)
-    {
-        target.setLocation(p);
     }
 
     protected void onRedrawEvent()
@@ -81,18 +89,18 @@ public class GameVisualizer extends JPanel
         EventQueue.invokeLater(this::repaint);
     }
 
-    protected void onModelUpdateEvent()
+//    protected void onModelUpdateEvent()
     {
 //        SCREEN_WIDTH = getWidth();
 //        SCREEN_HEIGHT = getHeight();
 //        double distance = distance(target.x, target.y,
-//                computerRobot.positionX, computerRobot.positionY);
+//                computerRobot.x, computerRobot.y);
 //        if (distance < 1)
 //        {
 //            return;
 //        }
 //        double velocity = maxVelocity;
-//        double angleToTarget = angleTo(computerRobot.positionX, computerRobot.positionY, target.x, target.y);
+//        double angleToTarget = angleTo(computerRobot.x, computerRobot.y, target.x, target.y);
 //        double angularVelocity = 0;
 //        if (angleToTarget > computerRobot.direction) {
 //            angularVelocity = maxAngularVelocity;
@@ -109,23 +117,23 @@ public class GameVisualizer extends JPanel
         Robot robot = gameController.getComputerRobot();
         velocity = MathLogic.applyLimits(velocity, 0, maxVelocity);
         angularVelocity = MathLogic.applyLimits(angularVelocity, -maxAngularVelocity, maxAngularVelocity);
-        double newX = robot.positionX + velocity / angularVelocity *
+        double newX = robot.x + velocity / angularVelocity *
                 (Math.sin(robot.direction  + angularVelocity * duration) -
                         Math.sin(robot.direction));
         if (!Double.isFinite(newX))
         {
-            newX = robot.positionX + velocity * duration * Math.cos(robot.direction);
+            newX = robot.x + velocity * duration * Math.cos(robot.direction);
         }
-        double newY = robot.positionY - velocity / angularVelocity *
+        double newY = robot.y - velocity / angularVelocity *
                 (Math.cos(robot.direction  + angularVelocity * duration) -
                         Math.cos(robot.direction));
         if (!Double.isFinite(newY))
         {
-            newY = robot.positionY + velocity * duration * Math.sin(robot.direction);
+            newY = robot.y + velocity * duration * Math.sin(robot.direction);
         }
 
-        robot.positionX = newX;
-        robot.positionY = newY;
+        robot.x = newX;
+        robot.y = newY;
         double newDirection = MathLogic.asNormalizedRadians(robot.direction + angularVelocity * duration);
         if (Math.abs(newX - SCREEN_WIDTH) <= 1 | Math.abs(newY - SCREEN_HEIGHT) <= 1 | newX <= 1 | newY <= 1){
             newDirection = (newDirection + Math.PI) % 2 * Math.PI;
@@ -138,8 +146,8 @@ public class GameVisualizer extends JPanel
     {
         super.paint(g);
         Graphics2D g2d = (Graphics2D)g;
-        drawComputerRobot(g2d, gameController.getComputerRobot());
-        drawUserRobot(g2d, gameController.getUserRobot());
+        drawComputerRobot(g2d);
+        drawUserRobot(g2d);
         drawTarget(g2d);
     }
 
@@ -153,8 +161,9 @@ public class GameVisualizer extends JPanel
         g.drawOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
     }
 
-    private void drawUserRobot(Graphics2D g, UserRobot robot)
+    private void drawUserRobot(Graphics2D g)
     {
+        UserRobot robot = gameController.getUserRobot();
         int robotCenterX = robot.getRoundedX();
         int robotCenterY = robot.getRoundedY();
         AffineTransform t = AffineTransform.getRotateInstance(robot.direction, robotCenterX, robotCenterY);
@@ -162,8 +171,9 @@ public class GameVisualizer extends JPanel
         drawRobotBody(g, robotCenterX, robotCenterY, robot);
     }
 
-    private void drawComputerRobot(Graphics2D g, ComputerRobot robot)
+    private void drawComputerRobot(Graphics2D g)
     {
+        ComputerRobot robot = gameController.getComputerRobot();
         int robotCenterX = robot.getRoundedX();
         int robotCenterY = robot.getRoundedY();
         AffineTransform t = AffineTransform.getRotateInstance(robot.direction, robotCenterX, robotCenterY);
@@ -183,11 +193,14 @@ public class GameVisualizer extends JPanel
     }
 
     private void drawTarget(Graphics2D g) {
+        Target target = gameController.getTarget();
+
+        int diam = target.getDiam();
         AffineTransform t = AffineTransform.getRotateInstance(0, 0, 0);
         g.setTransform(t);
-        g.setColor(Color.GREEN);
-        fillOval(g, target.x, target.y, 5, 5);
+        g.setColor(target.color);
+        fillOval(g, target.x, target.y, diam, diam);
         g.setColor(Color.BLACK);
-        drawOval(g, target.x, target.y, 5, 5);
+        drawOval(g, target.x, target.y, diam, diam);
     }
 }

@@ -13,11 +13,9 @@ public class KeyPressAdapter extends KeyAdapter {
     }
 
     public void keyPressed(KeyEvent e) {
-        System.out.println("keyPressed   -----   " + e.getKeyChar());
         updateMovementState(e, true);
     }
     public void keyReleased(KeyEvent e) {
-        System.out.println("keyReleased   -----   " + e.getKeyChar());
         updateMovementState(e, false);
     }
 

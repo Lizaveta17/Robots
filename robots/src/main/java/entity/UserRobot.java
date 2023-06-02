@@ -1,5 +1,7 @@
 package entity;
 
+import logic.MathLogic;
+
 import java.awt.*;
 
 public class UserRobot extends Robot{
@@ -8,20 +10,21 @@ public class UserRobot extends Robot{
     }
 
     public void goLeft(){
-        double newX = positionX - velocity;
-        positionX = newX;
+        double newX = x - velocity;
+        x = newX;
     }
     public void goRight(){
-        double newX = positionX + velocity;
-        positionX = newX;
+        double newX = x + velocity;
+        x = newX;
     }
     public void goUp(){
-        double newY = positionY - velocity;
-        positionY = newY;
+        double newY = y - velocity;
+        y = newY;
     }
     public void goDown(){
-        double newY = positionY + velocity;
-        positionY = newY;
+        double newY = y + velocity;
+        y = newY;
 
     }
+
 }

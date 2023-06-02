@@ -4,9 +4,9 @@ import logic.MathLogic;
 
 import java.awt.*;
 
-public class Robot {
-    public volatile double positionX;
-    public volatile double positionY;
+public class Robot{
+    public volatile double x;
+    public volatile double y;
     public volatile double direction;
     public volatile double velocity;
     public final Color bodyColor;
@@ -14,8 +14,8 @@ public class Robot {
     public final int heightDiam;
 
     public Robot(double x, double y, double direction, double velocity, Color bodyColor, int widthDiam, int heightDiam){
-        positionX = x;
-        positionY = y;
+        this.x = x;
+        this.y = y;
         this.direction = direction;
         this.velocity = velocity;
         this.bodyColor = bodyColor;
@@ -24,10 +24,10 @@ public class Robot {
     }
 
     public int getRoundedX(){
-        return MathLogic.round(positionX);
+        return MathLogic.round(x);
     }
     public int getRoundedY(){
-        return MathLogic.round(positionY);
+        return MathLogic.round(y);
     }
 }
 

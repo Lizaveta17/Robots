@@ -1,5 +1,7 @@
 package logic;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public class MathLogic {
     public static int round(double value)
     {
@@ -37,5 +39,9 @@ public class MathLogic {
         double diffY = toY - fromY;
 
         return MathLogic.asNormalizedRadians(Math.atan2(diffY, diffX));
+    }
+
+    public static int generateRandomLimitInt(int limit){
+        return ThreadLocalRandom.current().nextInt(1, limit);
     }
 }
