@@ -1,7 +1,7 @@
 package gui;
 
 
-import gui.closing.JInternalFrameWithClosingConfirmation;
+import gui.system_windows.InternalWindow;
 import log.LogChangeListener;
 import log.LogEntry;
 import log.LogWindowSource;
@@ -10,7 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 
 
-public class LogWindow extends JInternalFrameWithClosingConfirmation implements LogChangeListener {
+public class LogWindow extends InternalWindow implements LogChangeListener {
     private final LogWindowSource m_logSource;
     private final TextArea m_logContent;
 

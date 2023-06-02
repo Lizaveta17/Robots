@@ -1,74 +1,89 @@
 package gui;
 
-import gui.closing.JFrameWithClosingConfirmation;
-import gui.closing.JInternalFrameWithClosingConfirmation;
 import gui.language.AppLanguage;
+import gui.language.LanguageManager;
+import gui.language.LocaleChangeable;
+import gui.system_windows.InternalWindow;
+import gui.system_windows.RecoveryConfirmDialog;
+import gui.system_windows.closing.Closeable;
+import gui.system_windows.closing.ClosingConfirmDialog;
+import gui.system_windows.serialization.StateRecoverable;
 import log.Logger;
-
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.util.ArrayList;
+import serializer.IntrenalFrameSerializer;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 
-public class MainApplicationFrame extends JFrameWithClosingConfirmation {
+public class MainApplicationFrame extends JFrame implements Closeable, LocaleChangeable, StateRecoverable, Serializable {
+    LanguageManager languageManager = new LanguageManager(Locale.getDefault().getLanguage());
+    ClosingConfirmDialog closeConfirmWindow = new ClosingConfirmDialog(languageManager);
     private final JDesktopPane desktopPane = new JDesktopPane();
-    private final ArrayList<JInternalFrameWithClosingConfirmation> internalFrames = new ArrayList<>();
 
     public MainApplicationFrame() {
-        setDefaultMode();
-
-        int inset = 50;
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds(inset, inset,
-                screenSize.width - inset * 2,
-                screenSize.height - inset * 2);
-
+        super();
+        setDefaultModeAndBounds();
         setContentPane(desktopPane);
 
-        LogWindow logWindow = createLogWindow();
-        addWindow(logWindow);
-        logWindow.setName("logWindow");
-        internalFrames.add(logWindow);
-
-        GameWindow gameWindow = createGameWindow();
-        gameWindow.setName("gameWindow");
-        addWindow(gameWindow);
-        internalFrames.add(gameWindow);
+        addLogWindow();
+        addGameWindow();
 
         generateAndSetMenuBar();
+
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        WindowAdapter windowAdapter = new WindowAdapter() {
+            public void windowClosing(WindowEvent windowEvent) {
+                exit();
+            }
+
+            public void windowOpened(WindowEvent windowEvent) {
+                recovery();
+            }
+        };
+        addWindowListener(windowAdapter);
     }
 
-    private void setDefaultMode() {
+    private void setDefaultModeAndBounds() {
         try {
             UIManager.setLookAndFeel(DisplayMode.NIMBUS.className);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        int inset = 50;
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds(inset, inset,
+                screenSize.width - inset * 2,
+                screenSize.height - inset * 2);
     }
 
-    private LogWindow createLogWindow() {
+    private void addLogWindow() {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource(), languageManager.getLocaleValue("logWindow.title"));
         logWindow.setLocation(10, 10);
         logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
         Logger.debug(languageManager.getLocaleValue("tests.startLog"));
-        return logWindow;
+        addWindow(logWindow);
     }
 
-    private GameWindow createGameWindow(){
+    private void addGameWindow() {
         int startWidth = 400;
         int startHeight = 400;
         GameWindow gameWindow = new GameWindow(languageManager.getLocaleValue("gameWindow.title"), startWidth, startHeight);
         gameWindow.setSize(startWidth, startHeight);
         gameWindow.setLocation(350, 10);
-        return gameWindow;
+        addWindow(gameWindow);
     }
 
-    protected void addWindow(JInternalFrame frame) {
+    protected void addWindow(InternalWindow frame) {
         desktopPane.add(frame);
         frame.setVisible(true);
     }
@@ -156,13 +171,58 @@ public class MainApplicationFrame extends JFrameWithClosingConfirmation {
     }
 
     @Override
-    protected void updateLocale(AppLanguage language) {
-        super.updateLocale(language);
+    public void updateLocale(AppLanguage language) {
+        languageManager.changeLanguage(language);
         generateAndSetMenuBar();
-        for (JInternalFrameWithClosingConfirmation frame : internalFrames) {
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
             frame.setTitle(languageManager.getLocaleValue(String.format("%s.title", frame.getName())));
-            frame.updateLocale(language);
+            InternalWindow window = (InternalWindow)frame;
+            window.updateLocale(language);
         }
         SwingUtilities.updateComponentTreeUI(this);
+    }
+
+    public void serialize() {
+        Preferences preferences = Preferences.userNodeForPackage(MainApplicationFrame.class);
+        preferences.put("language", languageManager.getCurrentLanguage().toString());
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            IntrenalFrameSerializer.serialize(frame);
+        }
+    }
+
+    @Override
+    public void exit() {
+        if (closeConfirmWindow.needClose()) {
+            serialize();
+            dispose();
+        }
+    }
+
+    @Override
+    public void recovery() {
+        Preferences prefs = Preferences.userNodeForPackage(MainApplicationFrame.class);
+        try {
+            prefs.sync();
+            AppLanguage lang;
+            try {
+                lang = AppLanguage.valueOf(
+                        prefs.get("language", Locale.getDefault().getLanguage()).toUpperCase()
+                );
+            } catch (IllegalArgumentException e) {
+                Logger.warning(languageManager.getLocaleValue("logMessage.backingStoreError"));
+                lang = AppLanguage.valueOf(Locale.getDefault().getLanguage());
+            }
+
+            LanguageManager langManager = new LanguageManager(lang.locale);
+            RecoveryConfirmDialog recoveryConfirmWindow = new RecoveryConfirmDialog(langManager);
+            updateLocale(lang);
+            if (recoveryConfirmWindow.needRecovery()) {
+                for (JInternalFrame frame : desktopPane.getAllFrames()) {
+                    IntrenalFrameSerializer.deserialize(frame);
+                }
+            }
+        } catch (BackingStoreException e) {
+            Logger.debug(languageManager.getLocaleValue("logMessage.backingStoreError"));
+        }
     }
 }

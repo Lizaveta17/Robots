@@ -31,4 +31,8 @@ public class LanguageManager {
     public void changeLanguage(AppLanguage language){
         currentLanguage = language;
     }
+
+    public AppLanguage getCurrentLanguage(){
+        return currentLanguage;
+    }
 }
