@@ -56,7 +56,6 @@ public class MainApplicationFrame extends JFrameWithClosingConfirmation {
         logWindow.setLocation(10, 10);
         logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
-        logWindow.pack();
         Logger.debug(languageManager.getLocaleValue("tests.startLog"));
         return logWindow;
     }
