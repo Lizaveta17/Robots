@@ -1,9 +1,6 @@
 package logic;
 
-import entity.ComputerRobot;
-import entity.RobotDirection;
-import entity.Target;
-import entity.UserRobot;
+import entity.*;
 import logic.entity.GameState;
 import logic.entity.Winner;
 
@@ -11,29 +8,37 @@ import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class GameController {
     private int fieldWidth;
     private int fieldHeight;
     private final ComputerRobot computerRobot;
+
+    private final Target computerRobotTarget;
     private final UserRobot userRobot;
     private final HashMap<RobotDirection, Boolean> userMovementState = new HashMap<>();
-    private final Target target;
+    private final ColorTarget food;
+    private final ColorTarget accelerator;
     private boolean isGameOn = false;
-    private volatile int score = 0;
-    private static final int VICTORY_SCORE = 2;
+    private boolean isComputerRobotOn = true;
+    private volatile int score;
+    private static final int VICTORY_SCORE = 5;
 
-    private final PropertyChangeSupport scoreChangeDispatcher = new PropertyChangeSupport(this);
+    private final Timer timer = new Timer("events generator", true);
+    private final PropertyChangeSupport gameStateChangeDispatcher = new PropertyChangeSupport(this);
 
     public GameController(int width, int height) {
         fieldWidth = width;
         fieldHeight = height;
         computerRobot = new ComputerRobot(
-                -100, -100, 0, 0.1, Color.MAGENTA, 30, 20, 5
+                -100, -100, 0, 1.2, Color.MAGENTA, 30, 20, 5
         );
-        userRobot = new UserRobot(-100, -100, 1, 3, Color.BLUE, 30, 30);
-        target = new Target(-100, -100, Color.RED);
-        //        target = new Target(MathLogic.round(width / 2.0), MathLogic.round(height / 2.0), Color.RED);
+        userRobot = new UserRobot(-100, -100, 1, 3, Color.BLUE, 30, 30, 0.5);
+        food = new ColorTarget(-100, -100, 12, Color.RED);
+        accelerator = new ColorTarget(-100, -100, 12, Color.YELLOW);
+        computerRobotTarget = new Target(-100, -100, 0);
     }
 
     private void initUserMovementState(){
@@ -50,8 +55,12 @@ public class GameController {
         return computerRobot;
     }
 
-    public Target getTarget() {
-        return target;
+    public ColorTarget getFood() {
+        return food;
+    }
+
+    public ColorTarget getAccelerator(){
+        return accelerator;
     }
 
     public void updateDirection(RobotDirection direction, boolean state) {
@@ -74,6 +83,12 @@ public class GameController {
         correctUserRobotCoordinates();
     }
 
+    private void updateComputerRobotTarget(int x, int y, int diam){
+        computerRobotTarget.x = x;
+        computerRobotTarget.y = y;
+        computerRobotTarget.diam = diam;
+    }
+
     private void correctUserRobotCoordinates() {
         if (fieldWidth != 0) {
             double newX = MathLogic.applyLimits(userRobot.x, userRobot.widthRadious, fieldWidth - userRobot.widthRadious);
@@ -86,14 +101,22 @@ public class GameController {
         }
     }
 
-    private boolean isUserRobotReachedTarget() {
+    private boolean isUserRobotReachedTarget(Target target) {
         double distance = Math.sqrt(Math.pow(userRobot.x - target.x, 2) + Math.pow(userRobot.y - target.y, 2));
-        return distance < userRobot.widthRadious || distance < userRobot.heightRadious;
+        return distance <= userRobot.widthRadious + target.radius || distance <= userRobot.heightRadious + target.radius;
+    }
+
+    private boolean isComputerRobotReachedUserRobot() {
+        Rectangle computerRobotTargetModel = new Rectangle(computerRobotTarget.x, computerRobotTarget.y,
+                computerRobotTarget.diam, computerRobotTarget.diam);
+        Rectangle computerRobotModel = new Rectangle(computerRobot.getRoundedX(), computerRobot.getRoundedY(),
+                computerRobot.widthDiam, computerRobot.heightDiam);
+        return computerRobotModel.intersects(computerRobotTargetModel);
     }
 
     private void setStartPositions(){
-        target.x = 300;
-        target.y = 300;
+        food.x = 300;
+        food.y = 300;
 
         userRobot.x = 200;
         userRobot.y = 200;
@@ -102,56 +125,125 @@ public class GameController {
         computerRobot.y = 100;
     }
 
-    private void generateNewTarget() {
+    private void deleteAccelerator(){
+        accelerator.x = -100;
+        accelerator.y = -100;
+    }
+
+    private void generateNewFood() {
         int newX = MathLogic.generateRandomLimitInt(fieldWidth);
         int newY = MathLogic.generateRandomLimitInt(fieldHeight);
-        target.x = newX;
-        target.y = newY;
+        food.x = newX;
+        food.y = newY;
+    }
+
+    private void generateNewAccelerator(){
+        int newX = MathLogic.generateRandomLimitInt(fieldWidth);
+        int newY = MathLogic.generateRandomLimitInt(fieldHeight);
+        accelerator.x = newX;
+        accelerator.y = newY;
     }
 
     private void updateScore(int diff){
         int newScore = score + diff;
-        if (newScore < 0){
-            stopGame(Winner.COMPUTER);
-        }
-        score = newScore;
-        scoreChangeDispatcher.firePropertyChange(GameState.SCORE_CHANGED.state, null, newScore);
+        score = Math.max(newScore, 0);
+        gameStateChangeDispatcher.firePropertyChange(GameState.SCORE_CHANGED.state, null, newScore);
     }
 
     public void startGame(){
-        isGameOn = true;
         score = 0;
+        gameStateChangeDispatcher.firePropertyChange(GameState.SCORE_CHANGED.state, null, score);
+        deleteAccelerator();
         initUserMovementState();
         setStartPositions();
+
+        isGameOn = true;
     }
     
     private void stopGame(Winner winner){
         isGameOn = false;
-        scoreChangeDispatcher.firePropertyChange(GameState.GAME_END.state, null, winner);
+        gameStateChangeDispatcher.firePropertyChange(GameState.GAME_END.state, null, winner);
+    }
+
+    private void moveRobots(){
+        moveUserRobot();
+        if (isComputerRobotOn){
+            setUserRobotToComputerRobotTarget();
+        }
+        computerRobot.turnToTarget(computerRobotTarget);
+        computerRobot.move();
+    }
+
+    private void setUserRobotToComputerRobotTarget(){
+        updateComputerRobotTarget(userRobot.getRoundedX(), userRobot.getRoundedY(), userRobot.widthDiam);
+    }
+
+    private void changeComputerRobotTarget(){
+        int newTargetX;
+        int newTargetY;
+        if (userRobot.x > fieldWidth / 2.0){
+            newTargetX = 0;
+        }
+        else {
+            newTargetX = fieldWidth;
+        }
+
+        if (userRobot.y > fieldHeight / 2.0){
+            newTargetY = 0;
+        }
+        else {
+            newTargetY = fieldHeight;
+        }
+        updateComputerRobotTarget(newTargetX, newTargetY, 0);
+        timer.schedule(new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                isComputerRobotOn = true;
+            }
+        }, 2000);
+
     }
 
     public void onModelUpdateEvent() {
         if (!isGameOn){
             return;
         }
+        moveRobots();
 
-        moveUserRobot();
+        if (isComputerRobotOn && isComputerRobotReachedUserRobot()){
+            isComputerRobotOn = false;
+            updateScore(-1);
+            changeComputerRobotTarget();
+            if (score == 0){
+                stopGame(Winner.COMPUTER);
+                return;
+            } else {
+                changeComputerRobotTarget();
+            }
+        }
 
-//        if (!isGameOn){
-//            return;
-//        }
-        if (isUserRobotReachedTarget()) {
+        if (isUserRobotReachedTarget(food)) {
             updateScore(1);
              if (score == VICTORY_SCORE){
                  stopGame(Winner.USER);
+                 return;
              } else {
-                 generateNewTarget();
+                 userRobot.decreaseVelocity();
+                 generateNewFood();
+                 generateNewAccelerator();
              }
+        }
+
+        if (isUserRobotReachedTarget(accelerator)) {
+            userRobot.increaseVelocity();
+            deleteAccelerator();
         }
     }
 
-    public void addStateGameListener(PropertyChangeListener listener){
-        scoreChangeDispatcher.addPropertyChangeListener(GameState.SCORE_CHANGED.state, listener);
-        scoreChangeDispatcher.addPropertyChangeListener(GameState.GAME_END.state, listener);
+    public void addGameStateListener(PropertyChangeListener listener){
+        gameStateChangeDispatcher.addPropertyChangeListener(GameState.SCORE_CHANGED.state, listener);
+        gameStateChangeDispatcher.addPropertyChangeListener(GameState.GAME_END.state, listener);
     }
 }

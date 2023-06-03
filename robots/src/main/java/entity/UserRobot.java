@@ -5,8 +5,13 @@ import logic.MathLogic;
 import java.awt.*;
 
 public class UserRobot extends Robot{
-    public UserRobot(double x, double y, double direction, double velocity, Color bodyColor, int widthDiam, int heightDiam) {
+    public final double velocityDiff;
+    private final double minVelocity = 1;
+    public UserRobot(
+            double x, double y, double direction, double velocity, Color bodyColor, int widthDiam, int heightDiam, double velocityDiff
+    ) {
         super(x, y, direction, velocity, bodyColor, widthDiam, heightDiam);
+        this.velocityDiff = velocityDiff;
     }
 
     public void goLeft(){
@@ -26,5 +31,15 @@ public class UserRobot extends Robot{
         y = newY;
 
     }
+    public void increaseVelocity(){
+        double newVelocity = velocity + velocityDiff;
+        velocity = newVelocity;
+    }
 
+    public void decreaseVelocity(){
+        double newVelocity = velocity - velocityDiff;
+        if (newVelocity >= minVelocity){
+            velocity = newVelocity;
+        }
+    }
 }

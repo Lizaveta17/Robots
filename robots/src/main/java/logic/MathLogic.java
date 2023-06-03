@@ -37,7 +37,6 @@ public class MathLogic {
     {
         double diffX = toX - fromX;
         double diffY = toY - fromY;
-
         return MathLogic.asNormalizedRadians(Math.atan2(diffY, diffX));
     }
 

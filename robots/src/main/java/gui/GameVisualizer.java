@@ -1,22 +1,13 @@
 package gui;
 
-import entity.Target;
+import entity.*;
 import logic.GameController;
 import gui.adapters.KeyPressAdapter;
-import entity.ComputerRobot;
-import entity.Robot;
-import entity.UserRobot;
-import logic.MathLogic;
 
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -25,16 +16,7 @@ import javax.swing.JPanel;
 
 public class GameVisualizer extends JPanel
 {
-    private final Timer m_timer = initTimer();
-
-    private static Timer initTimer()
-    {
-        Timer timer = new Timer("events generator", true);
-        return timer;
-    }
-
-    private int SCREEN_WIDTH;
-    private int SCREEN_HEIGHT;
+    private final Timer m_timer = new Timer("events generator", true);
 
     private int fieldWidth;
     private int fieldHeight;
@@ -88,58 +70,6 @@ public class GameVisualizer extends JPanel
         EventQueue.invokeLater(this::repaint);
     }
 
-//    protected void onModelUpdateEvent()
-    {
-//        SCREEN_WIDTH = getWidth();
-//        SCREEN_HEIGHT = getHeight();
-//        double distance = distance(target.x, target.y,
-//                computerRobot.x, computerRobot.y);
-//        if (distance < 1)
-//        {
-//            return;
-//        }
-//        double velocity = maxVelocity;
-//        double angleToTarget = angleTo(computerRobot.x, computerRobot.y, target.x, target.y);
-//        double angularVelocity = 0;
-//        if (angleToTarget > computerRobot.direction) {
-//            angularVelocity = maxAngularVelocity;
-//        }
-//        if (angleToTarget < computerRobot.direction) {
-//            angularVelocity = -maxAngularVelocity;
-//        }
-//
-//        moveRobot(velocity, angularVelocity, 10);
-    }
-
-    private void moveRobot(double velocity, double angularVelocity, double duration)
-    {
-        Robot robot = gameController.getComputerRobot();
-        velocity = MathLogic.applyLimits(velocity, 0, maxVelocity);
-        angularVelocity = MathLogic.applyLimits(angularVelocity, -maxAngularVelocity, maxAngularVelocity);
-        double newX = robot.x + velocity / angularVelocity *
-                (Math.sin(robot.direction  + angularVelocity * duration) -
-                        Math.sin(robot.direction));
-        if (!Double.isFinite(newX))
-        {
-            newX = robot.x + velocity * duration * Math.cos(robot.direction);
-        }
-        double newY = robot.y - velocity / angularVelocity *
-                (Math.cos(robot.direction  + angularVelocity * duration) -
-                        Math.cos(robot.direction));
-        if (!Double.isFinite(newY))
-        {
-            newY = robot.y + velocity * duration * Math.sin(robot.direction);
-        }
-
-        robot.x = newX;
-        robot.y = newY;
-        double newDirection = MathLogic.asNormalizedRadians(robot.direction + angularVelocity * duration);
-        if (Math.abs(newX - SCREEN_WIDTH) <= 1 | Math.abs(newY - SCREEN_HEIGHT) <= 1 | newX <= 1 | newY <= 1){
-            newDirection = (newDirection + Math.PI) % 2 * Math.PI;
-        }
-        robot.direction = newDirection;
-    }
-
     @Override
     public void paint(Graphics g)
     {
@@ -147,7 +77,8 @@ public class GameVisualizer extends JPanel
         Graphics2D g2d = (Graphics2D)g;
         drawComputerRobot(g2d);
         drawUserRobot(g2d);
-        drawTarget(g2d);
+        drawTarget(g2d, gameController.getFood());
+        drawTarget(g2d, gameController.getAccelerator());
     }
 
     private static void fillOval(Graphics g, int centerX, int centerY, int diam1, int diam2)
@@ -191,10 +122,8 @@ public class GameVisualizer extends JPanel
         fillOval(g, robotCenterX, robotCenterY, robot.widthDiam, robot.heightDiam);
     }
 
-    private void drawTarget(Graphics2D g) {
-        Target target = gameController.getTarget();
-
-        int diam = target.getDiam();
+    private void drawTarget(Graphics2D g, ColorTarget target) {
+        int diam = target.diam;
         AffineTransform t = AffineTransform.getRotateInstance(0, 0, 0);
         g.setTransform(t);
         g.setColor(target.color);

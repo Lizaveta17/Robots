@@ -5,18 +5,13 @@ import java.awt.*;
 public class Target {
     public volatile int x;
     public volatile int y;
-    public final Color color;
+    public volatile int diam;
+    public final int radius;
 
-    private final int diam = 8;
-
-    public Target(int x, int y, Color color) {
+    public Target(int x, int y, int diam) {
         this.x = x;
         this.y = y;
-        this.color = color;
+        this.diam = diam;
+        radius = diam / 2;
     }
-
-    public int getDiam(){
-        return diam;
-    };
-
 }

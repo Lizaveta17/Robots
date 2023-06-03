@@ -19,7 +19,7 @@ public class GameWindow extends InternalWindow {
     public GameWindow(String title, int startWidth, int startHeight) {
         super(title);
         gameController = new GameController(startWidth, startHeight);
-        gameController.addStateGameListener(this);
+        gameController.addGameStateListener(this);
         gameVisualizer = new GameVisualizer(gameController);
 
         scoreLabel = getScoreLabel();
