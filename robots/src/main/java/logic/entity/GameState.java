@@ -1,9 +1,8 @@
-package logic;
+package logic.entity;
 
 public enum GameState {
     SCORE_CHANGED("SCORE_CHANGED"),
-    GAME_WIN("GAME_WIN"),
-    GAME_OVER("GAME_OVER");
+    GAME_END("GAME_END");
 
 
     public final String state;

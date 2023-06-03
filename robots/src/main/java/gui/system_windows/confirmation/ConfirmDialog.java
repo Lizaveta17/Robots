@@ -1,5 +1,7 @@
 package gui.system_windows.confirmation;
 
+import gui.language.LanguageManager;
+
 import javax.swing.*;
 
 public interface ConfirmDialog {

@@ -192,7 +192,7 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
 
     @Override
     public void exit() {
-        if (closeConfirmWindow.needClose()) {
+        if (closeConfirmWindow.confirmDialogAnswerIsPositive()) {
             serialize();
             dispose();
         }
@@ -216,7 +216,7 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
             LanguageManager langManager = new LanguageManager(lang.locale);
             RecoveryConfirmDialog recoveryConfirmWindow = new RecoveryConfirmDialog(langManager);
             updateLocale(lang);
-            if (recoveryConfirmWindow.needRecovery()) {
+            if (recoveryConfirmWindow.confirmDialogAnswerIsPositive()) {
                 for (JInternalFrame frame : desktopPane.getAllFrames()) {
                     IntrenalFrameSerializer.deserialize(frame);
                 }

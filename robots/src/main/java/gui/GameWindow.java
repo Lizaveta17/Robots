@@ -1,8 +1,10 @@
 package gui;
 
 import gui.system_windows.InternalWindow;
+import gui.system_windows.GameRestartDialog;
 import logic.GameController;
-import logic.GameState;
+import logic.entity.GameState;
+import logic.entity.Winner;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,8 +13,8 @@ import java.beans.PropertyChangeEvent;
 public class GameWindow extends InternalWindow {
     private final GameVisualizer gameVisualizer;
     private final GameController gameController;
-
     private final JLabel scoreLabel;
+    private JButton startButton;
 
     public GameWindow(String title, int startWidth, int startHeight) {
         super(title);
@@ -47,32 +49,37 @@ public class GameWindow extends InternalWindow {
     }
 
     private JPanel getStartButtonPanel(){
-        JButton button = new JButton(languageManager.getLocaleValue("start"));
-        button.addActionListener(event -> {
+        startButton = new JButton(languageManager.getLocaleValue("start"));
+        startButton.addActionListener(event -> {
             gameController.startGame();
-            button.setEnabled(false);
+            startButton.setEnabled(false);
             }
         );
 
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(button, BorderLayout.CENTER);
+        panel.add(startButton, BorderLayout.CENTER);
         return panel;
     }
 
-    private void changeScore(Object newValue){
-        scoreLabel.setText(languageManager.getLocaleValue("score") + newValue.toString());
+    private void handleGameEnd(Object winner){
+        String messageKey = "";
+        if (winner.equals(Winner.USER)) {
+            messageKey = "winMessage";
+        } else if (winner.equals(Winner.COMPUTER)) {
+            messageKey = "lostMessage";
+        }
+        if (new GameRestartDialog(languageManager, messageKey).confirmDialogAnswerIsPositive()){
+            startButton.setEnabled(true);
+        }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals(GameState.SCORE_CHANGED.state)) {
-            changeScore(evt.getNewValue());
+            scoreLabel.setText(languageManager.getLocaleValue("score") + evt.getNewValue().toString());
         }
-        if (evt.getPropertyName().equals(GameState.GAME_OVER.state)) {
-//            updateBundleResources((ResourceBundle) evt.getNewValue());
-        }
-        if (evt.getPropertyName().equals(GameState.GAME_WIN.state)) {
-//            updateBundleResources((ResourceBundle) evt.getNewValue());
+        if (evt.getPropertyName().equals(GameState.GAME_END.state)) {
+            handleGameEnd(evt.getNewValue());
         }
     }
 }

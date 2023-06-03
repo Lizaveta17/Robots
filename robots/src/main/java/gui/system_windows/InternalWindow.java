@@ -29,7 +29,7 @@ public class InternalWindow extends JInternalFrame implements Closeable, LocaleC
     }
 
     public void exit(){
-        if (closeDialog.needClose()){
+        if (closeDialog.confirmDialogAnswerIsPositive()){
             dispose();
         }
     }

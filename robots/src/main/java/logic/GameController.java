@@ -4,6 +4,8 @@ import entity.ComputerRobot;
 import entity.RobotDirection;
 import entity.Target;
 import entity.UserRobot;
+import logic.entity.GameState;
+import logic.entity.Winner;
 
 import java.awt.*;
 import java.beans.PropertyChangeListener;
@@ -32,6 +34,9 @@ public class GameController {
         userRobot = new UserRobot(-100, -100, 1, 3, Color.BLUE, 30, 30);
         target = new Target(-100, -100, Color.RED);
         //        target = new Target(MathLogic.round(width / 2.0), MathLogic.round(height / 2.0), Color.RED);
+    }
+
+    private void initUserMovementState(){
         for (RobotDirection direction : RobotDirection.values()) {
             userMovementState.put(direction, false);
         }
@@ -107,7 +112,7 @@ public class GameController {
     private void updateScore(int diff){
         int newScore = score + diff;
         if (newScore < 0){
-            handleGameOver();
+            stopGame(Winner.COMPUTER);
         }
         score = newScore;
         scoreChangeDispatcher.firePropertyChange(GameState.SCORE_CHANGED.state, null, newScore);
@@ -115,20 +120,14 @@ public class GameController {
 
     public void startGame(){
         isGameOn = true;
+        score = 0;
+        initUserMovementState();
         setStartPositions();
     }
     
-    private void stopGame(){
+    private void stopGame(Winner winner){
         isGameOn = false;
-    }
-
-    private void handleGameWin(){
-        stopGame();
-        scoreChangeDispatcher.firePropertyChange(GameState.GAME_WIN.state, null, null);
-    }
-    private void handleGameOver(){
-        stopGame();
-        scoreChangeDispatcher.firePropertyChange(GameState.GAME_OVER.state, null, null);
+        scoreChangeDispatcher.firePropertyChange(GameState.GAME_END.state, null, winner);
     }
 
     public void onModelUpdateEvent() {
@@ -144,7 +143,7 @@ public class GameController {
         if (isUserRobotReachedTarget()) {
             updateScore(1);
              if (score == VICTORY_SCORE){
-                 handleGameWin();
+                 stopGame(Winner.USER);
              } else {
                  generateNewTarget();
              }
@@ -153,7 +152,6 @@ public class GameController {
 
     public void addStateGameListener(PropertyChangeListener listener){
         scoreChangeDispatcher.addPropertyChangeListener(GameState.SCORE_CHANGED.state, listener);
-        scoreChangeDispatcher.addPropertyChangeListener(GameState.GAME_WIN.state, listener);
-        scoreChangeDispatcher.addPropertyChangeListener(GameState.GAME_OVER.state, listener);
+        scoreChangeDispatcher.addPropertyChangeListener(GameState.GAME_END.state, listener);
     }
 }
