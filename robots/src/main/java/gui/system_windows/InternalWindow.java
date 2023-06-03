@@ -15,8 +15,8 @@ public class InternalWindow extends JInternalFrame implements Closeable, LocaleC
     protected LanguageManager languageManager;
     ClosingConfirmDialog closeDialog;
 
-    public InternalWindow(){
-        super("", true, true, true, true);
+    public InternalWindow(String title){
+        super(title, true, true, true, true);
         languageManager = new LanguageManager(Locale.getDefault().getLanguage());
         closeDialog = new ClosingConfirmDialog(languageManager);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -24,7 +24,6 @@ public class InternalWindow extends JInternalFrame implements Closeable, LocaleC
             public void internalFrameClosing(InternalFrameEvent e) {exit();}
         };
         addInternalFrameListener(frameAdapter);
-        pack();
     }
 
     public void exit(){

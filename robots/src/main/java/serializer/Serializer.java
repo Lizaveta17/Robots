@@ -1,31 +1,22 @@
 package serializer;
 
 import gui.system_windows.InternalWindow;
-import log.Logger;
-
-import javax.swing.*;
 import java.util.prefs.Preferences;
 
 public class Serializer {
-    public static void serialize(Preferences preferences, JInternalFrame frame) {
-        Preferences frameNode = preferences.node(frame.getClass().getName());
-        frameNode.put("title", frame.getTitle());
-        frameNode.putInt("width", frame.getWidth());
-        frameNode.putInt("height", frame.getHeight());
-        frameNode.putInt("x", frame.getX());
-        frameNode.putInt("y", frame.getY());
-        frameNode.putBoolean("icon", frame.isIcon());
+    public static void serialize(InternalWindow window) {
+        String name = window.getName();
+        Preferences prefs = Preferences.userNodeForPackage(window.getClass());
+        prefs.putInt(name + ".width", window.getWidth());
+        prefs.putInt(name + ".height", window.getHeight());
+        prefs.putInt(name + ".x", window.getX());
+        prefs.putInt(name + ".y", window.getY());
     }
 
-    public static InternalFrameModel deserialize(Preferences preferences, String frameName){
-        Preferences frameNode = preferences.node(frameName);
-        return new InternalFrameModel(
-            frameNode.get("title", ""),
-            frameNode.getInt("width", 0),
-            frameNode.getInt("width", 0),
-            frameNode.getInt("x", 0),
-            frameNode.getInt("y", 0),
-            frameNode.getBoolean("icon", false)
-        );
+    public static void deserialize(InternalWindow window) {
+        String name = window.getName();
+        Preferences prefs = Preferences.userNodeForPackage(window.getClass());
+        window.setSize(prefs.getInt(name + ".width", 0), prefs.getInt(name + ".height", 0));
+        window.setLocation(prefs.getInt(name + ".x", 0), prefs.getInt(name + ".y", 0));
     }
 }
