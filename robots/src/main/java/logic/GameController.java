@@ -41,6 +41,10 @@ public class GameController {
         computerRobotTarget = new Target(-100, -100, 0);
     }
 
+    public int getScore(){
+        return score;
+    }
+
     private void initUserMovementState(){
         for (RobotDirection direction : RobotDirection.values()) {
             userMovementState.put(direction, false);

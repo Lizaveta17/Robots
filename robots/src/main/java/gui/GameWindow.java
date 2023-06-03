@@ -1,5 +1,6 @@
 package gui;
 
+import gui.language.AppLanguage;
 import gui.system_windows.InternalWindow;
 import gui.system_windows.GameRestartDialog;
 import logic.GameController;
@@ -81,5 +82,12 @@ public class GameWindow extends InternalWindow {
         if (evt.getPropertyName().equals(GameState.GAME_END.state)) {
             handleGameEnd(evt.getNewValue());
         }
+    }
+
+    @Override
+    public void updateLocale(AppLanguage language) {
+        super.updateLocale(language);
+        startButton.setText(languageManager.getLocaleValue("start"));
+        scoreLabel.setText(languageManager.getLocaleValue("score") + gameController.getScore());
     }
 }
