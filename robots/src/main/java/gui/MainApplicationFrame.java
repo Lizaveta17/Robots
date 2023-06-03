@@ -198,25 +198,30 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
         }
     }
 
+    private AppLanguage getSavedLanguage(Preferences prefs){
+        AppLanguage lang;
+        try {
+            lang = AppLanguage.valueOf(
+                    prefs.get("language", Locale.getDefault().getLanguage()).toUpperCase()
+            );
+        } catch (IllegalArgumentException e) {
+            Logger.warning(languageManager.getLocaleValue("logMessage.backingStoreError"));
+            lang = AppLanguage.valueOf(Locale.getDefault().getLanguage());
+        }
+        return lang;
+    }
+
     @Override
     public void recovery() {
         Preferences prefs = Preferences.userNodeForPackage(MainApplicationFrame.class);
         try {
             prefs.sync();
-            AppLanguage lang;
-            try {
-                lang = AppLanguage.valueOf(
-                        prefs.get("language", Locale.getDefault().getLanguage()).toUpperCase()
-                );
-            } catch (IllegalArgumentException e) {
-                Logger.warning(languageManager.getLocaleValue("logMessage.backingStoreError"));
-                lang = AppLanguage.valueOf(Locale.getDefault().getLanguage());
-            }
-
+            AppLanguage lang = getSavedLanguage(prefs);
             LanguageManager langManager = new LanguageManager(lang.locale);
             RecoveryConfirmDialog recoveryConfirmWindow = new RecoveryConfirmDialog(langManager);
-            updateLocale(lang);
+
             if (recoveryConfirmWindow.confirmDialogAnswerIsPositive()) {
+                updateLocale(lang);
                 for (JInternalFrame frame : desktopPane.getAllFrames()) {
                     IntrenalFrameSerializer.deserialize(frame);
                 }
