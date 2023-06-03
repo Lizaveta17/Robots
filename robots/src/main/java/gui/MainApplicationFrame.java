@@ -68,7 +68,7 @@ public class MainApplicationFrame extends JFrame implements Closeable, LocaleCha
     private void addLogWindow() {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource(), languageManager.getLocaleValue("LogWindow.title"));
         logWindow.setLocation(10, 10);
-        logWindow.setSize(300, 800);
+        logWindow.setSize(300, 500);
         setMinimumSize(logWindow.getSize());
         Logger.debug(languageManager.getLocaleValue("tests.startLog"));
         addWindow(logWindow);
