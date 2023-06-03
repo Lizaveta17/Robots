@@ -17,12 +17,6 @@ import javax.swing.JPanel;
 public class GameVisualizer extends JPanel
 {
     private final Timer m_timer = new Timer("events generator", true);
-
-    private int fieldWidth;
-    private int fieldHeight;
-
-    private static final double maxVelocity = 0.1;
-    private static final double maxAngularVelocity = 0.001;
     private final GameController gameController;
 
     public GameVisualizer(GameController gameController)
@@ -44,22 +38,7 @@ public class GameVisualizer extends JPanel
                 gameController.onModelUpdateEvent();
             }
         }, 0, 10);
-//        addMouseListener(new MouseAdapter()
-//        {
-//            @Override
-//            public void mouseClicked(MouseEvent e)
-//            {
-////                setTargetPosition(e.getPoint());
-//                System.out.println("WDECFVD");
-//                repaint();
-//            }
-//        });
-//        addComponentListener(new ComponentAdapter() {
-//            @Override
-//            public void componentResized(ComponentEvent e) {
-//                gameController.applyLimits(getWidth(), getHeight());
-//            }
-//        });
+
         addKeyListener(new KeyPressAdapter(gameController));
         setFocusable(true);
         setDoubleBuffered(true);
